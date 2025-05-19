@@ -1,5 +1,6 @@
 package admin.admin.Configuration;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -13,6 +14,9 @@ import java.util.Collections;
 @Configuration
 public class CorsConfig {
 
+    @Value("${frontend.url}")
+    private String frontendURL;
+
     @Bean
     public CorsFilter corsFilter() {
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -20,15 +24,8 @@ public class CorsConfig {
 
         // Allow credentials
         config.setAllowCredentials(true);
-
-        // Allow specific origins or use * for any origin (not recommended for production)
         config.setAllowedOrigins(Arrays.asList(
-                "https://192.168.140.162:5173",  // Your frontend URL
-                "https://192.168.43.162:5173",  // Your frontend URL
-                "http://192.168.140.162:5173",   // In case HTTP is used
-                "http://localhost:5173"  ,        // For local development
-                "https://localhost:5173" ,         // For local development
-                "https://192.168.129.162:5173"
+                frontendURL
         ));
 
         // Allow common HTTP methods
@@ -60,14 +57,7 @@ public class CorsConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList(
-                "https://192.168.140.162:5173",
-                "https://192.168.43.162:5173",
-                "https://192.168.129.162:5173",
-                "http://192.168.140.162:5173",
-                "http://localhost:5173",
-                "https://localhost:5173"
-        ));
+        configuration.setAllowedOrigins(Arrays.asList(frontendURL));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);

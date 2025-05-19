@@ -53,8 +53,14 @@ public class SecurityConfig {
                                 "/topic/**",
                                 "/app/**",
 
-                                "/admin/login",//for login using username password
+                                "/auth/login",//for login using username password
                                 "/admin",//for Register New Admin
+
+                                //Forgot Password
+                                "/forgot-password/**",
+                                "/forgot-password/verify/**",
+
+                                "/feedback/**",//feedback
 
                                 //OAuth2
                                 "/login",

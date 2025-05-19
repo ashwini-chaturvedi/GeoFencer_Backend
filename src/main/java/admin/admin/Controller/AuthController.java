@@ -1,6 +1,7 @@
 package admin.admin.Controller;
 
 import admin.admin.Entity.Admin;
+import admin.admin.Service.AdminService;
 import admin.admin.Service.AdminUserDetailService;
 import admin.admin.Service.JWT_Service;
 import jakarta.servlet.http.HttpServletResponse;
@@ -16,9 +17,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/auth")
 public class AuthController {
 
     @Autowired
@@ -38,6 +41,9 @@ public class AuthController {
 
     @Value("${oauth2.redirect.baseurl}")
     private String oauth2RedirectBaseUrl;
+
+    @Autowired
+    private AdminService adminService;
 
     /**
      * Traditional username/password login
@@ -60,8 +66,11 @@ public class AuthController {
             System.out.println("User authenticated successfully: " + userDetails.getUsername());
             System.out.println("Generated JWT token: " + token);
 
+            Map<String,Object>Details=new HashMap<>();
+            Details.put("token",token);
+            Details.put("userData",adminService.findByEmailId(admin.getEmailId()));
             // Return token in the response
-            return ResponseEntity.ok(token);
+            return ResponseEntity.ok(Details);
 
         } catch (BadCredentialsException e) {
             System.out.println("Authentication failed: Invalid credentials");

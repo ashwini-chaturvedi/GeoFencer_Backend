@@ -2,6 +2,7 @@ package admin.admin.Configuration;
 
 import admin.admin.Interceptors.JwtHandShakeInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
@@ -14,6 +15,11 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Autowired
     private JwtHandShakeInterceptor jwtHandShakeInterceptor;
+
+    @Value("${frontend_url}")
+    private String frontendURL;
+
+
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry.enableSimpleBroker("/topic"); // Enables a simple message broker with a "topic" prefix for broadcasting messages
@@ -24,7 +30,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws") // Defines the WebSocket endpoint that clients connect to
                 .addInterceptors(jwtHandShakeInterceptor)
-                .setAllowedOrigins("https://192.168.129.162:5173")// Allows requests only from the specified frontend URL
+                .setAllowedOrigins(frontendURL)// Allows requests only from the specified frontend URL
                 .withSockJS(); // Enables SockJS fallback for browsers that don't support WebSockets
     }
 }
