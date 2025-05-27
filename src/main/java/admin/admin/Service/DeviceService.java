@@ -51,7 +51,19 @@ public class DeviceService {
     public List<Device> update(List<Device> device) {
         return deviceLibrary.saveAll(device);
     }
+    public Device updateDevice(long id,Device device) {
+       Device existingDevice= this.deviceLibrary.findById(id);
+       existingDevice.setOutOfGeofence(device.isOutOfGeofence());
+        return deviceLibrary.save(existingDevice);
+    }
 
+    public Device updateSingleDevice(Device device) {
+        try {
+            return deviceLibrary.save(device);
+        } catch (OptimisticLockingFailureException e) {
+            throw new OptimisticLockingFailureException("The device has been modified by another user.");
+        }
+    }
 
     //READ
     // Fetch all devices by admin email

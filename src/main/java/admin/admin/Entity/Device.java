@@ -22,6 +22,9 @@ public class Device {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long deviceId;
 
+    @Column(name = "out_of_geofence")
+    private boolean outOfGeofence = false;
+
     private String uniqueId;
 
     private String deviceName;

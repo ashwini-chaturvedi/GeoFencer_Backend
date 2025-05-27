@@ -135,7 +135,7 @@ public class LocationController {
 
     @MessageMapping("/update-location")
     @SendTo("/topic/location")
-    public Location broadcastLiveLocation(@Payload String data , Principal principal) {
+    public Location broadcastLiveLocation(@Payload String data ) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode jsonNode = objectMapper.readTree(data);
@@ -158,16 +158,56 @@ public class LocationController {
                 existingLocation.setDistance(distance);
 
 
-                String authenticatedEmail=principal.getName();
 
-                if(!distance.equals("0.00")&&Double.parseDouble(distance)>device.getGeofenceRadius()){
 
-                    Admin admin=device.getAdmin();
-                    String email= admin.getEmailId();
-                    String body="Your device "+device.getDeviceName()+" is Out of the Geofence area";
+                if (!distance.equals("0.00") && Double.parseDouble(distance) > device.getGeofenceRadius()) {
+                    if (!device.isOutOfGeofence()) {
+                        // First breach, send email
+                        Admin admin = device.getAdmin();
+                        String email = admin.getEmailId();
 
-                    emailService.sendEmail(email,"GeofenceUpdate",body);
+                        String deviceName=device.getDeviceName();
+                        LocalDateTime time=device.getCurrentLocation().getDateTime();
+                        double lat=device.getCurrentLocation().getLatitude();
+                        double lng=device.getCurrentLocation().getLongitude();
+
+                        String googleMapsLink = "https://www.google.com/maps?q=" + lat + "," + lng;
+
+                        String body = String.format(
+                                "Dear %s,\n\n"
+                                        + "This is to inform you that your device **'%s'** has breached the geofence boundary.\n\n"
+                                        + "**Details:**\n"
+                                        + "• Time: %s\n"
+                                        + "• Latitude: %.6f\n"
+                                        + "• Longitude: %.6f\n"
+                                        + "• Current Distance from Home: %s meters\n\n"
+                                        + "You can view the location on the map here:\n%s\n\n"
+                                        + "Please take the necessary action if this movement was unauthorized.\n\n"
+                                        + "Regards,\n"
+                                        + "Geofence Monitoring System",
+                                admin.getFullName(),
+                                deviceName,
+                                time,
+                                lat,
+                                lng,
+                                distance,
+                                googleMapsLink
+                        );
+
+                        emailService.sendEmail(email, "⚠️ Geofence Breach Alert - " + deviceName, body);
+
+                        // Set flag
+                        device.setOutOfGeofence(true);
+                        deviceService.updateDevice(device.getDeviceId(),device); // Add this method to persist the flag
+                    }
+                } else {
+                    // Device is back inside geofence, reset the flag
+                    if (device.isOutOfGeofence()) {
+                        device.setOutOfGeofence(false);
+                        deviceService.updateDevice(device.getDeviceId(),device);
+                    }
                 }
+
 
                 locationService.updateLocation(existingLocation);
                 return existingLocation;

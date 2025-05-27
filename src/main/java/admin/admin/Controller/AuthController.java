@@ -33,15 +33,6 @@ public class AuthController {
     @Autowired
     private AdminUserDetailService userDetailsService;
 
-    @Value("${spring.security.oauth2.client.registration.google.client-id}")
-    private String googleClientId;
-
-    @Value("${spring.security.oauth2.client.registration.github.client-id}")
-    private String githubClientId;
-
-    @Value("${oauth2.redirect.baseurl}")
-    private String oauth2RedirectBaseUrl;
-
     @Autowired
     private AdminService adminService;
 
@@ -81,23 +72,6 @@ public class AuthController {
         }
     }
 
-    /**
-     * Endpoint to initiate OAuth2 login with Google
-     */
-    @GetMapping("/oauth2/google")
-    public void initiateGoogleLogin(HttpServletResponse response) throws IOException {
-        String redirectUri = oauth2RedirectBaseUrl + "/oauth2/authorization/google";
-        response.sendRedirect(redirectUri);
-    }
-
-    /**
-     * Endpoint to initiate OAuth2 login with GitHub
-     */
-    @GetMapping("/oauth2/github")
-    public void initiateGithubLogin(HttpServletResponse response) throws IOException {
-        String redirectUri = oauth2RedirectBaseUrl + "/oauth2/authorization/github";
-        response.sendRedirect(redirectUri);
-    }
 
 
 }

@@ -3,8 +3,10 @@ package admin.admin.Controller;
 
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
+import admin.admin.Entity.Location;
 import admin.admin.Service.AdminService;
 import admin.admin.Service.LocationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,34 +64,89 @@ public class DeviceController {
         }
     }
 
+
     @PutMapping("/update/{email}")
-    public ResponseEntity<List<Device>> update(@PathVariable String email ,@RequestBody Device device) {
+    public ResponseEntity<Device> updateDevice(@PathVariable String email, @RequestBody Device device) {
         try {
 
+            // Get all devices for this admin
             List<Device> devices = deviceService.readAllByAdminEmail(email);
             if (devices.isEmpty()) {
-                System.out.println("Empty");
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
             }
-            Device targetDevice=devices.stream()
-                    .filter(prevDevice->prevDevice.getDeviceId()==device.getDeviceId())
-                    .findFirst().orElseThrow();
 
-            int idx=devices.indexOf(targetDevice);//Index of the target Device
+            // Find the specific device to update
+            Device targetDevice = devices.stream()
+                    .filter(existingDevice -> Objects.equals(existingDevice.getDeviceId(), device.getDeviceId()))
+                    .findFirst()
+                    .orElse(null);
+
+            if (targetDevice == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+
+            // Update basic device properties
+            if (device.getDeviceName() != null && !device.getDeviceName().trim().isEmpty()) {
+                targetDevice.setDeviceName(device.getDeviceName().trim());
+            }
+
+            targetDevice.setGeofenceRadius(device.getGeofenceRadius());
 
 
-            targetDevice.setDeviceName(device.getDeviceName());
+            if (device.getUniqueId() != null) {
+                targetDevice.setUniqueId(device.getUniqueId());
+            }
 
-            //Updating the location with the specific device id
-            locationController.updateLocation(device.getDeviceId(),device.getHomeLocation());
-            locationController.updateLocation(device.getDeviceId(),device.getCurrentLocation());
+            // Handle home location update
+            if (device.getHomeLocation() != null) {
+                if (targetDevice.getHomeLocation() != null) {
 
-            devices.set(idx,targetDevice);
+                    // Update existing home location
+                    Location existingHomeLocation = targetDevice.getHomeLocation();
+                    existingHomeLocation.setLatitude(device.getHomeLocation().getLatitude());
+                    existingHomeLocation.setLongitude(device.getHomeLocation().getLongitude());
+                    existingHomeLocation.setDistance(device.getHomeLocation().getDistance());
+                    if (device.getHomeLocation().getDateTime() != null) {
+                        existingHomeLocation.setDateTime(device.getHomeLocation().getDateTime());
+                    }
+                    // Update via LocationController
+                    locationController.updateLocation(targetDevice.getDeviceId(), existingHomeLocation);
+                } else {
+                    // Create new home location
+                    device.getHomeLocation().setDevice(targetDevice);
+                    targetDevice.setHomeLocation(device.getHomeLocation());
+                    locationController.addLocation(device.getHomeLocation());
+                }
+            }
 
-            System.out.println("targetDevice:"+targetDevice);
+            // Handle current location update
+            if (device.getCurrentLocation() != null) {
+                if (targetDevice.getCurrentLocation() != null) {
+                    // Update existing current location
+                    Location existingCurrentLocation = targetDevice.getCurrentLocation();
+                    existingCurrentLocation.setLatitude(device.getCurrentLocation().getLatitude());
+                    existingCurrentLocation.setLongitude(device.getCurrentLocation().getLongitude());
+                    existingCurrentLocation.setDistance(device.getCurrentLocation().getDistance());
+                    if (device.getCurrentLocation().getDateTime() != null) {
+                        existingCurrentLocation.setDateTime(device.getCurrentLocation().getDateTime());
+                    }
+                    // Update via LocationController
+                    locationController.updateLocation(targetDevice.getDeviceId(), existingCurrentLocation);
+                } else {
+                    // Create new current location
+                    device.getCurrentLocation().setDevice(targetDevice);
+                    targetDevice.setCurrentLocation(device.getCurrentLocation());
+                    locationController.addLocation(device.getCurrentLocation());
+                }
+            }
 
-            return ResponseEntity.ok(this.deviceService.update(devices));
+            // Save the updated device
+            Device updatedDevice = deviceService.updateSingleDevice(targetDevice);
+
+            return ResponseEntity.ok(updatedDevice);
+
         } catch (Exception e) {
+            System.err.println("Error updating device: " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
