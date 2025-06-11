@@ -17,15 +17,15 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Service
-public class JWT_Service {
+public class JWT_Service {//This Service will Generate a JWT token
 
-    private String secretKey="";
+    private String secretKey="";//Secret Key for encoding/decoding
 
     public JWT_Service(){
         try {
-            KeyGenerator keyGenerator=KeyGenerator.getInstance("HmacSHA256");
+            KeyGenerator keyGenerator=KeyGenerator.getInstance("HmacSHA256");//this is how we want to generate the key i.e. using which algorithm
 
-            SecretKey key=keyGenerator.generateKey();
+            SecretKey key=keyGenerator.generateKey();//Generating the Key
 
             secretKey=Base64.getEncoder().encodeToString(key.getEncoded());
 
@@ -40,7 +40,7 @@ public class JWT_Service {
         //Map to save the Token with respect to all the data
         Map<String,Object>mapOfClaims=new HashMap<>();
 
-        //Building the JWT using the email id ,issue time , expire time and signing it
+        //Building the JWT using the email id and signing it
         return Jwts
                 .builder()
                 .claims()
@@ -78,6 +78,7 @@ public class JWT_Service {
                 .getPayload();
     }
 
+    //Validating the Token
     public boolean validateToken(String token, UserDetails userDetails) {
         final String adminEmailId=extractEmailIdFromToken(token);
 

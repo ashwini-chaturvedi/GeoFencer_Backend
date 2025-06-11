@@ -4,9 +4,7 @@ import admin.admin.Entity.Admin;
 import admin.admin.Service.AdminService;
 import admin.admin.Service.AdminUserDetailService;
 import admin.admin.Service.JWT_Service;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -35,6 +33,11 @@ public class AuthController {
 
     @Autowired
     private AdminService adminService;
+
+    @GetMapping("/ping")
+    public ResponseEntity<String> ping() {
+        return ResponseEntity.ok("pong");
+    }
 
     /**
      * Traditional username/password login

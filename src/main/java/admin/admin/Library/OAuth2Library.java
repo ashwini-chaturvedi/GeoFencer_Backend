@@ -18,7 +18,7 @@ import java.io.IOException;
  * and sending it in the response or redirecting the user to a URL with the token.
  */
 @Component
-public class OAuth2Handler extends SimpleUrlAuthenticationSuccessHandler {
+public class OAuth2Library extends SimpleUrlAuthenticationSuccessHandler {
 
     @Autowired
     private JWT_Service jwtService;

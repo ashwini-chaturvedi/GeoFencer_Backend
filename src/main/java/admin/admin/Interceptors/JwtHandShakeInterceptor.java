@@ -26,11 +26,11 @@ public class JwtHandShakeInterceptor implements HandshakeInterceptor {
             String authHeader = httpRequest.getHeader("Authorization");
 
             if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                String jwt = authHeader.substring(7);
+                String jwtTokenFromRequest = authHeader.substring(7);
 
                 try {
                     // ✅ Use your JWT_Service to validate
-                    String email = jwtService.extractEmailIdFromToken(jwt);
+                    String email = this.jwtService.extractEmailIdFromToken(jwtTokenFromRequest);
 
                     // (Optional) you can also validate expiration separately if you want
                     if (email != null) {

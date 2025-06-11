@@ -9,53 +9,16 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
 import java.util.Arrays;
-import java.util.Collections;
 
 @Configuration
 public class CorsConfig {
 
-    @Value("${frontend.url}")
+    @Value("${frontend.url}")//This will Inject the FrontEnd Url from the application.properties file
     private String frontendURL;
 
     @Bean
-    public CorsFilter corsFilter() {
-        final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        final CorsConfiguration config = new CorsConfiguration();
-
-        // Allow credentials
-        config.setAllowCredentials(true);
-        config.setAllowedOrigins(Arrays.asList(
-                frontendURL
-        ));
-
-        // Allow common HTTP methods
-        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-
-        // Allow all headers
-        config.setAllowedHeaders(Arrays.asList(
-                "Origin",
-                "Content-Type",
-                "Accept",
-                "Authorization",
-                "X-Requested-With",
-                "Access-Control-Request-Method",
-                "Access-Control-Request-Headers"
-        ));
-
-        // Expose headers that frontend can access
-        config.setExposedHeaders(Arrays.asList(
-                "Access-Control-Allow-Origin",
-                "Access-Control-Allow-Credentials",
-                "Authorization"
-        ));
-
-        // Apply this configuration to all paths
-        source.registerCorsConfiguration("/**", config);
-        return new CorsFilter(source);
-    }
-
-    @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+// Creates a CorsConfigurationSource bean used by Spring Security internally.
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList(frontendURL));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));

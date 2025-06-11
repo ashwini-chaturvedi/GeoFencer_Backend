@@ -71,6 +71,7 @@ public class LocationController {
 
             Map<String, Object> response = new HashMap<>();
             response.put("location", homeLocation);
+            response.put("lastLocation", locationService.findCurrentLocationByDeviceId(deviceId));
             response.put("deviceName", homeLocation.getDevice().getDeviceName());
             response.put("geofenceRadius", homeLocation.getDevice().getGeofenceRadius());
             response.put("uniqueId", homeLocation.getDevice().getUniqueId());

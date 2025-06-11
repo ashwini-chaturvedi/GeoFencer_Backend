@@ -1,6 +1,6 @@
 package admin.admin.Configuration;
 
-import admin.admin.Library.OAuth2Handler;
+import admin.admin.Library.OAuth2Library;
 import admin.admin.Filter.JWT_Filter;
 import admin.admin.Service.AdminUserDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -30,16 +29,13 @@ public class SecurityConfig {
     private AdminUserDetailService adminUserDetailService; //to get data form DB
 
     @Autowired
-    private JWT_Filter jwtFilter;
+    private JWT_Filter jwtFilter;//Custom Filter
 
     @Autowired
-    private OAuth2Handler oAuth2Handler;
+    private CorsConfigurationSource corsConfigurationSource;//it is for Spring Security Internally Provides CORS config to Spring Security
 
     @Autowired
-    private CorsConfigurationSource corsConfigurationSource;
-
-    @Autowired
-    private CorsFilter corsFilter;
+    private CorsFilter corsFilter;//it is for basic browser cors filtering Registers a custom CorsFilter that configures CORS for all requests.
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -54,17 +50,16 @@ public class SecurityConfig {
                                 "/app/**",
 
                                 "/auth/login",//for login using username password
+                                "/auth/ping",//dummy for Monitor so that the server stays alive
                                 "/admin",//for Register New Admin
 
                                 //Forgot Password
                                 "/forgot-password/**",
                                 "/forgot-password/verify/**",
 
-                                "/feedback/**",//feedback
+                                "/feedback/**"//feedback
 
-                                //OAuth2
-                                "/login",
-                                "/oauth2/**")
+                                )
                         .permitAll()
                         .anyRequest()
                         .authenticated()
@@ -72,7 +67,7 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .authenticationProvider(authenticationProvider())
+                .authenticationProvider(this.authenticationProvider())
                 .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
@@ -82,7 +77,7 @@ public class SecurityConfig {
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(adminUserDetailService);
-        provider.setPasswordEncoder(passwordEncoder());
+        provider.setPasswordEncoder(this.passwordEncoder());
         return provider;
     }
 
