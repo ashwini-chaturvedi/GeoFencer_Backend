@@ -35,9 +35,9 @@ public class FeedbackController {
 
         String developerEmail="ashwinichaturvedi8924@gmail.com";
 
-        emailService.sendEmail(developerEmail,subject,message);
+        emailService.sendEmail(developerEmail,"Feedback:"+subject,message);
 
-        return (ResponseEntity<?>) ResponseEntity.ok();
+        return  ResponseEntity.ok().body("Mail Sent");
 
     }
 

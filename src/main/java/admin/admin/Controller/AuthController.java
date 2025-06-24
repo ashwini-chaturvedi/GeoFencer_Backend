@@ -14,7 +14,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -58,7 +57,6 @@ public class AuthController {
             final String token = jwtService.generateJWToken(userDetails.getUsername());
 
             System.out.println("User authenticated successfully: " + userDetails.getUsername());
-            System.out.println("Generated JWT token: " + token);
 
             Map<String,Object>Details=new HashMap<>();
             Details.put("token",token);
